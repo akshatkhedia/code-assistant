@@ -1,0 +1,69 @@
+## Basic LangChain Questions
+1. "How do I create a simple chain in LangChain?"
+2. "How do I use ChatPromptTemplate with LCEL?"
+3. "How do I create a custom runnable in LangChain?"
+4. "How do I add memory to a LangChain conversation?"
+5. "How do I use different LLM providers in LangChain?"
+
+## RAG (Retrieval-Augmented Generation) Questions
+6. "How do I build a RAG chain with vector stores?"
+7. "How do I create embeddings and store them in FAISS?"
+8. "How do I implement document retrieval with similarity search?"
+9. "How do I combine a retriever with an LLM in LangChain?"
+10. "How do I implement chunking strategies for RAG applications?"
+
+## Advanced LangChain Questions
+11. "How do I create a custom agent with tools?"
+12. "How do I implement streaming responses in LangChain?"
+13. "How do I use callbacks and tracing in LangChain?"
+14. "How do I create a custom output parser?"
+15. "How do I implement error handling in LangChain chains?"
+
+## LangGraph Specific Questions
+16. "How do I create a LangGraph workflow with multiple nodes?"
+17. "How do I implement conditional logic in LangGraph?"
+18. "How do I add human-in-the-loop to a LangGraph workflow?"
+19. "How do I handle state management in LangGraph?"
+20. "How do I implement self-correction loops in LangGraph?"
+
+## Integration & Production Questions
+21. "How do I connect LangChain with external APIs?"
+22. "How do I use LangChain with different LLM providers?"
+23. "How do I implement caching in LangChain applications?"
+24. "How do I add monitoring and logging to LangChain apps?"
+25. "How do I deploy LangChain applications to production?"
+
+## Performance & Optimization Questions
+26. "How do I optimize LangChain chains for better performance?"
+27. "How do I implement batching in LangChain applications?"
+28. "How do I reduce token usage in LangChain applications?"
+29. "How do I implement parallel processing in LangChain?"
+30. "How do I handle rate limiting with LangChain?"
+
+## Testing & Evaluation Questions
+31. "How do I test LangChain chains?"
+32. "How do I evaluate the quality of generated responses?"
+33. "How do I implement A/B testing for LangChain applications?"
+34. "How do I monitor LangChain application performance?"
+35. "How do I implement automated testing for LangChain workflows?"
+
+## Real-World Application Questions
+36. "How do I build a customer support chatbot with LangChain?"
+37. "How do I create a document Q&A system with RAG?"
+38. "How do I build a code generation assistant like this one?"
+39. "How do I create a multi-agent system with LangGraph?"
+40. "How do I build a content generation pipeline with LangChain?"
+
+## Technical Architecture Questions
+41. "How do I design a scalable LangChain application architecture?"
+42. "How do I implement microservices with LangChain?"
+43. "How do I handle data persistence in LangChain applications?"
+44. "How do I implement security in LangChain applications?"
+45. "How do I design a multi-tenant LangChain application?"
+
+## Troubleshooting & Debugging Questions
+46. "How do I debug LangChain chain execution?"
+47. "How do I handle common LangChain errors?"
+48. "How do I optimize LangChain memory usage?"
+49. "How do I troubleshoot LangGraph workflow issues?"
+50. "How do I implement proper error recovery in LangChain?"

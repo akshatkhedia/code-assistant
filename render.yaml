@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: langgraph-code-assistant
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app_gradio.py
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: LANGCHAIN_API_KEY
+        sync: false
+      - key: LANGCHAIN_TRACING_V2
+        value: "false"
+      - key: LANGCHAIN_PROJECT
+        value: "langgraph-code-assistant"
+      - key: DEFAULT_MODEL
+        value: "gpt-4o-mini"
+      - key: MAX_ITERATIONS
+        value: "3"
+      - key: REFLECTION_MODE
+        value: "do_not_reflect"
+      - key: PORT
+        value: "7860"
