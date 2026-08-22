@@ -1,116 +1,139 @@
-# LangGraph Code Assistant
+# 🤖 LangGraph Code Assistant
 
-A sophisticated code generation system using LangGraph with RAG (Retrieval-Augmented Generation) and self-correction capabilities. This project demonstrates advanced AI/ML concepts including iterative code generation, automated testing, and intelligent error correction.
+A state-of-the-art Python code generation system built with **LangGraph**, **FAISS Vector RAG**, and **OpenAI GPT Models**. Implements the **AlphaCodium self-correction paradigm**, automatically testing candidate Python code, capturing runtime tracebacks, generating LLM error reflections, and self-healing solutions in sandboxed execution runtimes.
 
-## 🚀 Features
+---
 
-- **LangGraph Workflow**: Advanced AI workflow with self-correction loops
-- **OpenAI Integration**: GPT-4o, GPT-4o-mini, and GPT-3.5-turbo support
-- **Smart Code Generation**: AI-powered code generation using LangChain documentation
-- **Auto-Fix Errors**: Automatically detects and corrects import/execution issues
-- **Tracing & Monitoring**: Optional LangSmith integration for debugging
-- **Built-in Evaluator**: Performance testing and validation tools
-- **Web Interface**: Clean Gradio UI for easy interaction
+## 🚀 Key Features
+
+- **LangGraph State Machine**: Stateful cyclical AI workflow managing conversation history, generation schema, iteration counts, and error states.
+- **FAISS Vector Indexing & RAG**: Chunks web documentation via `RecursiveCharacterTextSplitter` and indexes embeddings with `FAISS` for semantic similarity retrieval ($k=4$).
+- **Structured Pydantic Output**: Enforces strict JSON schemas (`prefix`, `imports`, `code`) via OpenAI Function Calling.
+- **Sandboxed Execution & Timeouts**: Runs dynamic code validation in isolated child processes with a 5-second timeout limit to prevent host process crashes or infinite loops.
+- **LLM Error Reflection Node**: Dedicated reflection node (`_reflect`) that analyzes execution tracebacks and generates targeted fix strategies before code re-generation.
+- **LangSmith MLOps & Benchmarking**: Full tracing and automated programmatic dataset evaluation framework.
+- **Web UI & CLI**: Clean **Gradio** web app and feature-packed Command Line Interface.
+
+---
 
 ## 🏗️ Architecture
 
-The system implements the AlphaCodium approach for iterative code generation:
+```mermaid
+flowchart TD
+    Start([START]) --> Ingestion[Document Ingestion & FAISS Vector Indexing]
+    Ingestion --> Retrieval[Semantic Similarity Retrieval k=4]
+    Retrieval --> Generate[generate node: LLM Structured Code Generation]
+    Generate --> CheckCode[check_code node: Sandboxed Multiprocessing Execution]
+    CheckCode --> Decision{Valid Imports & Execution?}
+    Decision -- Yes --> End([END: Return Working Code])
+    Decision -- No & Iterations < Max --> Reflect[reflect node: LLM Error Reflection]
+    Decision -- No & Iterations >= Max --> End
+    Reflect --> Generate
+```
 
-1. **Document Loading**: Loads and processes documentation (default: LCEL docs)
-2. **Code Generation**: Uses OpenAI with structured output to generate code
-3. **Validation**: Automatically tests imports and code execution
-4. **Self-Correction**: Iteratively improves solutions based on error feedback
-5. **Output**: Returns validated, working code solutions
+---
 
 ## 📋 Prerequisites
 
-- Python 3.8+
-- OpenAI API key
-- (Optional) LangSmith API key for tracing and evaluation
+- **Python**: 3.8+
+- **OpenAI API Key**: Set `OPENAI_API_KEY` in your `.env` file
+- **(Optional) LangSmith API Key**: Set `LANGCHAIN_API_KEY` for evaluation & tracing
 
-> **💡 Minimal Setup**: The app works with just your OpenAI API key! All other configuration is optional.
+---
 
-## 🛠️ Installation
+## 🛠️ Quick Start
 
-### Quick Setup
+### 1. Clone & Setup Virtual Environment
 
-1. **Clone the repository**:
-   ```bash
-   git clone <your-repo-url>
-   cd langgraph-code-assistant
-   ```
+```bash
+git clone https://github.com/akshatkhedia/code-assistant.git
+cd code-assistant
 
-2. **Create virtual environment**:
-   ```bash
-   python -m venv .venv
-   .venv\Scripts\activate  # Windows
-   # or
-   source .venv/bin/activate  # Linux/Mac
-   ```
+# Create virtual environment
+python3 -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-3. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+# Install dependencies
+pip install -r requirements.txt
+```
 
-4. **Configure your API keys**:
-   ```bash
-   # Create a .env file
-   echo. > .env  # Windows
-   # or
-   touch .env  # Linux/Mac
-   
-   # Edit the .env file
-   notepad .env  # Windows
-   # or
-   nano .env  # Linux/Mac
-   ```
-   
-   Add your configuration:
-   ```env
-   # Required - Only this is needed for the app to work
-   OPENAI_API_KEY=your_openai_api_key_here
-   
-   # Optional - LangSmith tracing (uncomment and set real values if needed)
-   # LANGCHAIN_API_KEY=your_langsmith_api_key_here
-   # LANGCHAIN_TRACING_V2=true
-   # LANGCHAIN_PROJECT=langgraph-code-assistant
-   
-   # Optional - Model configuration (defaults work fine)
-   # DEFAULT_MODEL=gpt-4o-mini
-   # MAX_ITERATIONS=3
-   # REFLECTION_MODE=do_not_reflect
-   ```
+### 2. Configure Environment Variables
 
-## 🚀 Usage
+Create a `.env` file in the project root:
 
-### Web UI
+```env
+# Required
+OPENAI_API_KEY=your_openai_api_key_here
 
-1. **Start the Gradio interface**:
-   ```bash
-   python app_gradio.py
-   ```
+# Optional: LangSmith Tracing & Observability
+# LANGCHAIN_API_KEY=your_langsmith_api_key
+# LANGCHAIN_TRACING_V2=true
+# LANGCHAIN_PROJECT=langgraph-code-assistant
 
-2. **Open your browser** to `http://localhost:7860`
+# Optional: Defaults
+DEFAULT_MODEL=gpt-4o-mini
+MAX_ITERATIONS=3
+REFLECTION_MODE=reflect
+```
 
-### Command Line Interface
+---
+
+## 💻 Usage
+
+### Web Interface (Gradio)
+
+Launch the interactive web application:
+
+```bash
+python app_gradio.py
+```
+
+Open your browser at `http://localhost:7860`. The app will automatically build the FAISS vector index and allow you to configure models (`gpt-4o-mini`, `gpt-4o`, `gpt-3.5-turbo`), adjust max iterations, and inspect code output alongside validation errors.
+
+### Command Line Interface (CLI)
+
+Run single-query generation directly from your terminal:
 
 ```bash
 # Basic usage
 python -m src.main "How do I build a RAG chain in LCEL?"
 
-# With custom options
+# Verbose output with custom model
 python -m src.main "How do I create a custom runnable?" \
-    --context-url "https://python.langchain.com/docs/concepts/lcel/" \
-    --model "gpt-4o-mini" \
+    --model "gpt-4o" \
     --max-iterations 3 \
     --verbose
 ```
 
-## 📊 Performance
+---
 
-The system has been evaluated on LCEL coding questions and shows:
+## 📊 Evaluation & Benchmarking
 
-- **Improved Success Rate**: LangGraph approach outperforms simple context stuffing
-- **Reliable Code Generation**: Consistent performance with structured output
-- **Error Recovery**: Effective self-correction for common coding issues
+Run the built-in LangSmith evaluator to score code solutions against test datasets:
+
+```python
+from src.evaluator import CodeEvaluator
+from src.langgraph_workflow import LangGraphCodeAssistant
+
+evaluator = CodeEvaluator()
+# Evaluates import check and runtime execution success rates
+```
+
+---
+
+## 📁 Repository Structure
+
+```text
+├── app_gradio.py          # Gradio Web UI entry point
+├── render.yaml            # Render.com deployment configuration
+├── requirements.txt       # Python dependency specifications
+├── example_questions.txt  # 50 benchmark coding questions
+└── src/
+    ├── config.py          # Environment configuration & tracing setup
+    ├── models.py          # Pydantic schema (CodeSolution) & GraphState
+    ├── document_loader.py # FAISS vector store creation & document chunking
+    ├── code_generator.py  # LLM chain, sandboxed execution & reflection chain
+    ├── langgraph_workflow.py # LangGraph StateGraph & node logic
+    ├── evaluator.py       # LangSmith benchmarking suite
+    └── main.py            # CLI entry point
+```
