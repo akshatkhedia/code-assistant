@@ -26,13 +26,13 @@ def main():
             print("Loading documentation...")
         
         loader = DocumentLoader()
-        context = loader.load_lcel_docs(args.context_url)
+        context, vectorstore = loader.load_lcel_docs(args.context_url)
         
         if args.verbose:
             print(f"Loaded {len(context)} characters of documentation")
         
         # Create assistant
-        assistant = LangGraphCodeAssistant(context, model=args.model)
+        assistant = LangGraphCodeAssistant(context=context, vectorstore=vectorstore, model=args.model)
         assistant.max_iterations = args.max_iterations
         
         # Generate solution

@@ -16,18 +16,19 @@ class GradioApp:
     def __init__(self):
         self.assistant = None
         self.context_loaded = False
-        self.context = None
+        self.context = ""
+        self.vectorstore = None
         self.current_model = None
     
     def load_context(self):
         """Fetch the LangChain documentation to use as context for code generation."""
         try:
-            print("Loading context...")
+            print("Loading context and building FAISS vector store...")
             loader = DocumentLoader()
-            self.context = loader.load_lcel_docs()
+            self.context, self.vectorstore = loader.load_lcel_docs()
             self.context_loaded = True
             print(f"Context loaded successfully! Length: {len(self.context)}")
-            return f"✅ Ready! Loaded {len(self.context)} characters of LCEL documentation"
+            return f"✅ Ready! Loaded LCEL documentation & FAISS vector index"
         except Exception as e:
             print(f"Error loading context: {str(e)}")
             import traceback
@@ -38,7 +39,7 @@ class GradioApp:
         """Initialize the code generation assistant with the loaded context."""
         if self.context_loaded:
             try:
-                self.assistant = LangGraphCodeAssistant(self.context)
+                self.assistant = LangGraphCodeAssistant(context=self.context, vectorstore=self.vectorstore)
                 return "✅ Assistant ready! You can now ask questions about LCEL"
             except Exception as e:
                 return f"❌ Failed to create assistant: {str(e)}"
@@ -67,7 +68,7 @@ class GradioApp:
             # Set up the assistant with the chosen model
             if not self.assistant or self.current_model != model:
                 print(f"Creating assistant with model: {model}")
-                self.assistant = LangGraphCodeAssistant(self.context, model=model)
+                self.assistant = LangGraphCodeAssistant(context=self.context, vectorstore=self.vectorstore, model=model)
                 self.current_model = model
             
             # Configure the iteration limit for self-correction

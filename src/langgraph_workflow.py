@@ -8,8 +8,9 @@ from .config import config
 
 class LangGraphCodeAssistant:
     
-    def __init__(self, context: str, model: str = None):
+    def __init__(self, context: str = "", vectorstore = None, model: str = None):
         self.context = context
+        self.vectorstore = vectorstore
         self.code_generator = CodeGenerator(model=model)
         self.max_iterations = config.max_iterations
         self.reflection_mode = config.reflection_mode
@@ -61,11 +62,11 @@ class LangGraphCodeAssistant:
 
         # We have been routed back to generation with an error
         if error == "yes":
-            print("Previous attempt had errors, retrying...")
+            print("Previous attempt had errors, retrying with error feedback...")
             messages += [
                 (
                     "user",
-                    "Now, try again. Invoke the code tool to structure the output with a prefix, imports, and code block:",
+                    "Now, try again. Address the previous error feedback and structure the output with a prefix, imports, and code block:",
                 )
             ]
 
@@ -152,13 +153,13 @@ class LangGraphCodeAssistant:
 
     def _reflect(self, state: GraphState) -> Dict[str, Any]:
         """
-        Reflect on errors (currently not implemented).
+        Reflect on previous code errors using LLM to generate a targeted fix plan.
 
         Args:
             state: The current graph state
 
         Returns:
-            New state with reflections
+            New state with LLM reflection added to messages
         """
         print("---REFLECTING ON ERRORS---")
 
@@ -167,8 +168,14 @@ class LangGraphCodeAssistant:
         iterations = state["iterations"]
         code_solution = state["generation"]
 
-        # Add reflection message
-        messages += [("assistant", "Reflecting on the errors and planning improvements...")]
+        # Invoke reflection LLM chain
+        try:
+            reflection_text = self.code_generator.reflect(messages)
+            print(f"Reflection generated: {reflection_text[:150]}...")
+            messages += [("assistant", f"Reflection & Fix Strategy:\n{reflection_text}")]
+        except Exception as e:
+            print(f"Warning: Reflection failed ({e}), using default fallback message.")
+            messages += [("assistant", "Reflecting on execution errors to revise imports and code structure.")]
         
         return {"generation": code_solution, "messages": messages, "iterations": iterations}
 
@@ -185,7 +192,7 @@ class LangGraphCodeAssistant:
         error = state["error"]
         iterations = state["iterations"]
 
-        if error == "no" or iterations == self.max_iterations:
+        if error == "no" or iterations >= self.max_iterations:
             print("---DECISION: FINISH---")
             return "end"
         else:
@@ -205,6 +212,15 @@ class LangGraphCodeAssistant:
         Returns:
             Dictionary containing the solution and metadata
         """
+        # Retrieve relevant context from vectorstore if available
+        if self.vectorstore is not None:
+            try:
+                retrieved_docs = self.vectorstore.similarity_search(question, k=4)
+                self.context = "\n\n --- \n\n".join([doc.page_content for doc in retrieved_docs])
+                print(f"Retrieved {len(retrieved_docs)} relevant context chunks from FAISS vector store.")
+            except Exception as e:
+                print(f"Warning: FAISS similarity search failed ({e}). Falling back to static context.")
+
         initial_state = {
             "messages": [("user", question)],
             "iterations": 0,
@@ -223,3 +239,4 @@ class LangGraphCodeAssistant:
             result = self.workflow.invoke(initial_state)
         
         return result
+

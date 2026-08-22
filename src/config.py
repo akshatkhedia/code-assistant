@@ -15,14 +15,14 @@ class Config:
         self.langchain_project: str = os.getenv("LANGCHAIN_PROJECT", "langgraph-code-assistant")
         self.default_model: str = os.getenv("DEFAULT_MODEL", "gpt-4o-mini")
         self.max_iterations: int = int(os.getenv("MAX_ITERATIONS", "3"))
-        self.reflection_mode: str = os.getenv("REFLECTION_MODE", "do_not_reflect")
+        self.reflection_mode: str = os.getenv("REFLECTION_MODE", "reflect")
         
         # Configure LangChain tracing if it is enabled
         self._setup_langchain_tracing()
         
         # Check if we have the required API key
         if not self.openai_api_key:
-            raise ValueError("OPENAI_API_KEY is required. Please set it in your .env file.")
+            print("Warning: OPENAI_API_KEY is not set in environment or .env file.")
     
     def _setup_langchain_tracing(self):
         if self.langchain_tracing_v2 and self.langchain_api_key:
